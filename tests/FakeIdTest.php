@@ -1,6 +1,5 @@
 <?php namespace Propaganistas\LaravelFakeId\Tests;
 
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Facades\Route;
 use Orchestra\Testbench\TestCase;
@@ -22,7 +21,10 @@ class FakeIdTest extends TestCase
         $this->configureDatabase();
 
         // disable throw error (500 & 404 in our case) in laravel <= 5.3
-        $this->disableExceptionHandling();
+        if(version_compare($this->app->version(), '5.3.0') <= 0)
+        {
+            $this->disableExceptionHandling();
+        }
 
         // add middleware for support version laravel >= 5.3
         $middlewareBindings = version_compare($this->app->version(), '5.3.0') >= 0 ? 'Illuminate\Routing\Middleware\SubstituteBindings' : null;
@@ -153,8 +155,8 @@ class FakeIdTest extends TestCase
      */
     protected function disableExceptionHandling()
     {
-        $this->oldExceptionHandler = $this->app->make(ExceptionHandler::class);
-        $this->app->instance(ExceptionHandler::class, new \Propaganistas\LaravelFakeId\Tests\Exception\DisableExceptionHandling);
+        $this->oldExceptionHandler = $this->app->make('\Illuminate\Contracts\Debug\ExceptionHandler');
+        $this->app->instance('\Illuminate\Contracts\Debug\ExceptionHandler', new \Propaganistas\LaravelFakeId\Tests\Exception\DisableExceptionHandling);
     }
 
     /**
@@ -162,7 +164,7 @@ class FakeIdTest extends TestCase
      */
     protected function withExceptionHandling()
     {
-        $this->app->instance(ExceptionHandler::class, $this->oldExceptionHandler);
+        $this->app->instance('\Illuminate\Contracts\Debug\ExceptionHandler', $this->oldExceptionHandler);
 
         return $this;
     }
