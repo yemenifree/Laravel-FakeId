@@ -6,6 +6,7 @@ use Orchestra\Testbench\TestCase;
 use Propaganistas\LaravelFakeId\Facades\FakeId;
 use Propaganistas\LaravelFakeId\Tests\Entities\Fake;
 use Propaganistas\LaravelFakeId\Tests\Entities\Real;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class FakeIdTest extends TestCase
 {
@@ -92,24 +93,34 @@ class FakeIdTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * @expectedException \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
     public function testResponseNotFoundWhenDecodeFailAndDebugOff()
     {
         $this->app['config']->set('app.debug', false);
 
         $response = $this->call('get', route('fake', ['fake' => 'not-number']));
 
-        $this->assertEquals(404, $response->getStatusCode());
+        $this->throwErrorFromResponse($response);
+
+        //$this->assertEquals(404, $response->getStatusCode());
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testResponseErrorWhenDecodeFailDebugOn()
     {
         $this->app['config']->set('app.debug', true);
 
         $response = $this->call('get', route('fake', ['fake' => 'not-number']));
 
-        $this->assertEquals(500, $response->getStatusCode());
-
         $this->app['config']->set('app.debug', false);
+
+        $this->throwErrorFromResponse($response);
+
+        //$this->assertEquals(500, $response->getStatusCode());
     }
 
     public function testResponseFineWhenPassFakeModel()
@@ -133,13 +144,25 @@ class FakeIdTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
+    /**
+     * @expectedException \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
     public function testResponseFailWhenPassModelId()
     {
         $model = Fake::create([]);
 
         $response = $this->call('get', route('fake', ['fake' => $model->id]));
 
-        $this->assertEquals(404, $response->getStatusCode());
+        $this->throwErrorFromResponse($response);
+
+        //$this->assertEquals(404, $response->getStatusCode());
+    }
+
+    protected function throwErrorFromResponse($response)
+    {
+        if (isset($response->exception)) { // throw error manual if app use error handler of laravel to render error as html content
+            throw $response->exception;
+        }
     }
 
     protected function getPackageProviders($app)
