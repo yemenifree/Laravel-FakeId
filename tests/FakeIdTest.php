@@ -155,21 +155,7 @@ class FakeIdTest extends TestCase
     protected function disableExceptionHandling()
     {
         $this->oldExceptionHandler = $this->app->make('\Symfony\Component\Debug\ExceptionHandler');
-        $this->app->instance('\Symfony\Component\Debug\ExceptionHandler', new class extends Handler
-        {
-            public function __construct()
-            {
-            }
-
-            public function report(\Exception $e)
-            {
-            }
-
-            public function render($request, \Exception $e)
-            {
-                throw $e;
-            }
-        });
+        $this->app->instance('\Symfony\Component\Debug\ExceptionHandler', '\Propaganistas\LaravelFakeId\Tests\Exception\DisableExceptionHandling');
     }
 
     /**
