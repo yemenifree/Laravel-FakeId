@@ -1,14 +1,18 @@
 <?php namespace Propaganistas\LaravelFakeId\Tests;
 
 use Illuminate\Database\Capsule\Manager as DB;
+use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Support\Facades\Route;
 use Orchestra\Testbench\TestCase;
 use Propaganistas\LaravelFakeId\Facades\FakeId;
 use Propaganistas\LaravelFakeId\Tests\Entities\Fake;
 use Propaganistas\LaravelFakeId\Tests\Entities\Real;
+use Symfony\Component\Debug\ExceptionHandler;
 
 class FakeIdTest extends TestCase
 {
+    protected $oldExceptionHandler;
+
     /**
      *
      */
@@ -17,6 +21,7 @@ class FakeIdTest extends TestCase
         parent::setUp();
 
         $this->configureDatabase();
+        $this->disableExceptionHandling();
 
         $middlewareBindings = version_compare($this->app->version(), '5.3.0') >= 0 ? 'Illuminate\Routing\Middleware\SubstituteBindings' : null;
 
@@ -137,6 +142,41 @@ class FakeIdTest extends TestCase
         $response = $this->call('get', route('fake', ['fake' => $model->id]));
 
         $this->assertEquals(404, $response->getStatusCode());
+    }
+
+    /**
+     * Disabling Exception Handling in Laravel
+     *
+     * author @adamwathan
+     */
+    protected function disableExceptionHandling()
+    {
+        $this->oldExceptionHandler = $this->app->make(ExceptionHandler::class);
+        $this->app->instance(ExceptionHandler::class, new class extends Handler
+        {
+            public function __construct()
+            {
+            }
+
+            public function report(\Exception $e)
+            {
+            }
+
+            public function render($request, \Exception $e)
+            {
+                throw $e;
+            }
+        });
+    }
+
+    /**
+     * author @adamwathan
+     */
+    protected function withExceptionHandling()
+    {
+        $this->app->instance(ExceptionHandler::class, $this->oldExceptionHandler);
+
+        return $this;
     }
 
     protected function getPackageProviders($app)
