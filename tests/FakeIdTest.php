@@ -20,12 +20,6 @@ class FakeIdTest extends TestCase
 
         $this->configureDatabase();
 
-        // disable throw error (500 & 404 in our case) in laravel <= 5.3
-        if(version_compare($this->app->version(), '5.3.0') <= 0)
-        {
-            $this->disableExceptionHandling();
-        }
-
         // add middleware for support version laravel >= 5.3
         $middlewareBindings = version_compare($this->app->version(), '5.3.0') >= 0 ? 'Illuminate\Routing\Middleware\SubstituteBindings' : null;
 
@@ -146,27 +140,6 @@ class FakeIdTest extends TestCase
         $response = $this->call('get', route('fake', ['fake' => $model->id]));
 
         $this->assertEquals(404, $response->getStatusCode());
-    }
-
-    /**
-     * Disabling Exception Handling in Laravel
-     *
-     * author @adamwathan
-     */
-    protected function disableExceptionHandling()
-    {
-        $this->oldExceptionHandler = $this->app->make('\Illuminate\Contracts\Debug\ExceptionHandler');
-        $this->app->instance('\Illuminate\Contracts\Debug\ExceptionHandler', new \Propaganistas\LaravelFakeId\Tests\Exception\DisableExceptionHandling);
-    }
-
-    /**
-     * author @adamwathan
-     */
-    protected function withExceptionHandling()
-    {
-        $this->app->instance('\Illuminate\Contracts\Debug\ExceptionHandler', $this->oldExceptionHandler);
-
-        return $this;
     }
 
     protected function getPackageProviders($app)
