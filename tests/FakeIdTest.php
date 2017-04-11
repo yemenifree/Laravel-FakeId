@@ -21,8 +21,11 @@ class FakeIdTest extends TestCase
         parent::setUp();
 
         $this->configureDatabase();
+
+        // disable throw error (500 & 404 in our case) in laravel <= 5.3
         $this->disableExceptionHandling();
 
+        // add middleware for support version laravel >= 5.3
         $middlewareBindings = version_compare($this->app->version(), '5.3.0') >= 0 ? 'Illuminate\Routing\Middleware\SubstituteBindings' : null;
 
         Route::model('real', 'Propaganistas\LaravelFakeId\Tests\Entities\Real');
@@ -151,8 +154,8 @@ class FakeIdTest extends TestCase
      */
     protected function disableExceptionHandling()
     {
-        $this->oldExceptionHandler = $this->app->make(ExceptionHandler::class);
-        $this->app->instance(ExceptionHandler::class, new class extends Handler
+        $this->oldExceptionHandler = $this->app->make('\Symfony\Component\Debug\ExceptionHandler');
+        $this->app->instance('\Symfony\Component\Debug\ExceptionHandler', new class extends Handler
         {
             public function __construct()
             {
@@ -174,7 +177,7 @@ class FakeIdTest extends TestCase
      */
     protected function withExceptionHandling()
     {
-        $this->app->instance(ExceptionHandler::class, $this->oldExceptionHandler);
+        $this->app->instance('\Symfony\Component\Debug\ExceptionHandler', $this->oldExceptionHandler);
 
         return $this;
     }
