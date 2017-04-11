@@ -93,7 +93,7 @@ class FakeIdTest extends TestCase
 
         $response = $this->call('get', route('fake', ['fake' => 'not-number']));
 
-        $this->assertEquals(404, $response->status());
+        $this->assertEquals(404, $response->getStatusCode());
     }
 
     public function testResponseErrorWhenDecodeFailDebugOn()
@@ -102,7 +102,7 @@ class FakeIdTest extends TestCase
 
         $response = $this->call('get', route('fake', ['fake' => 'not-number']));
 
-        $this->assertEquals(500, $response->status());
+        $this->assertEquals(500, $response->getStatusCode());
 
         $this->app['config']->set('app.debug', false);
     }
@@ -114,7 +114,7 @@ class FakeIdTest extends TestCase
         $response = $this->call('get', route('fake', ['fake' => $model]));
 
         $this->assertContains((string)$model->id, $response->getContent());
-        $this->assertEquals(200, $response->status());
+        $this->assertEquals(200, $response->getStatusCode());
     }
 
     public function testResponseFineWhenPassNormalModel()
@@ -124,7 +124,8 @@ class FakeIdTest extends TestCase
         $response = $this->call('get', route('real', ['real' => $model]));
 
         $this->assertContains((string)$model->id, $response->getContent());
-        $this->assertEquals(200, $response->status());
+
+        $this->assertEquals(200, $response->getStatusCode());
     }
 
     public function testResponseFailWhenPassModelId()
@@ -133,7 +134,7 @@ class FakeIdTest extends TestCase
 
         $response = $this->call('get', route('fake', ['fake' => $model->id]));
 
-        $this->assertEquals(404, $response->status());
+        $this->assertEquals(404, $response->getStatusCode());
     }
 
     protected function getPackageProviders($app)
