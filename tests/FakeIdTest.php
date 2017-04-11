@@ -18,16 +18,18 @@ class FakeIdTest extends TestCase
 
         $this->configureDatabase();
 
+        $middlewareBindings = version_compare($this->app->version(), '5.3.0') >= 0 ? 'Illuminate\Routing\Middleware\SubstituteBindings' : null;
+
         Route::model('real', 'Propaganistas\LaravelFakeId\Tests\Entities\Real');
         Route::fakeIdModel('fake', 'Propaganistas\LaravelFakeId\Tests\Entities\Fake');
 
         Route::get('real/{real}', ['as' => 'real', function ($real) {
             return $real->id;
-        }])->middleware('Illuminate\Routing\Middleware\SubstituteBindings');
+        }, 'middleware'                 => $middlewareBindings]);
 
         Route::get('fake/{fake}', ['as' => 'fake', function ($fake) {
             return $fake->id;
-        }])->middleware('Illuminate\Routing\Middleware\SubstituteBindings');
+        }, 'middleware'                 => $middlewareBindings]);
     }
 
     protected function configureDatabase()
