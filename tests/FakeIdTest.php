@@ -100,7 +100,9 @@ class FakeIdTest extends TestCase
     {
         $this->app['config']->set('app.debug', true);
 
-        $this->call('get', route('fake', ['fake' => 'not-number']))->assertStatus(500);
+        $response = $this->call('get', route('fake', ['fake' => 'not-number']));
+
+        $this->assertEquals(500, $response->status());
 
         $this->app['config']->set('app.debug', false);
     }
@@ -109,21 +111,29 @@ class FakeIdTest extends TestCase
     {
         $model = Fake::create([]);
 
-        $this->call('get', route('fake', ['fake' => $model]))->assertStatus(200)->assertSee((string)$model->id);
+        $response = $this->call('get', route('fake', ['fake' => $model]));
+
+        $this->assertContains((string)$model->id, $response->getContent());
+        $this->assertEquals(200, $response->status());
     }
 
     public function testResponseFineWhenPassNormalModel()
     {
         $model = Real::create([]);
 
-        $this->call('get', route('real', ['real' => $model]))->assertStatus(200)->assertSee((string)$model->id);
+        $response = $this->call('get', route('real', ['real' => $model]));
+
+        $this->assertContains((string)$model->id, $response->getContent());
+        $this->assertEquals(200, $response->status());
     }
 
     public function testResponseFailWhenPassModelId()
     {
         $model = Fake::create([]);
 
-        $this->call('get', route('fake', ['fake' => $model->id]))->assertStatus(404);
+        $response = $this->call('get', route('fake', ['fake' => $model->id]));
+
+        $this->assertEquals(404, $response->status());
     }
 
     protected function getPackageProviders($app)
