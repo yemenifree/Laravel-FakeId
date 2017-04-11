@@ -1,6 +1,8 @@
 <?php
+
 namespace Propaganistas\LaravelFakeId\Tests\Exception;
 
+use Exception;
 use Illuminate\Foundation\Exceptions\Handler;
 
 class DisableExceptionHandling extends Handler
@@ -9,12 +11,12 @@ class DisableExceptionHandling extends Handler
     {
     }
 
-    public function report(\Exception $e)
+    public function report(Exception $e)
     {
     }
 
-    public function render($request, \Exception $e)
+    public function render($request, Exception $exception)
     {
-        throw $e;
+        return parent::render($request, $exception);
     }
 }

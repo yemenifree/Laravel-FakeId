@@ -1,5 +1,6 @@
 <?php namespace Propaganistas\LaravelFakeId\Tests;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Facades\Route;
 use Orchestra\Testbench\TestCase;
@@ -152,8 +153,8 @@ class FakeIdTest extends TestCase
      */
     protected function disableExceptionHandling()
     {
-        $this->oldExceptionHandler = $this->app->make('\Illuminate\Contracts\Debug\ExceptionHandler');
-        $this->app->instance('\Illuminate\Contracts\Debug\ExceptionHandler', '\Propaganistas\LaravelFakeId\Tests\Exception\DisableExceptionHandling');
+        $this->oldExceptionHandler = $this->app->make(ExceptionHandler::class);
+        $this->app->instance(ExceptionHandler::class, new \Propaganistas\LaravelFakeId\Tests\Exception\DisableExceptionHandling);
     }
 
     /**
@@ -161,7 +162,7 @@ class FakeIdTest extends TestCase
      */
     protected function withExceptionHandling()
     {
-        $this->app->instance('\Illuminate\Contracts\Debug\ExceptionHandler', $this->oldExceptionHandler);
+        $this->app->instance(ExceptionHandler::class, $this->oldExceptionHandler);
 
         return $this;
     }
